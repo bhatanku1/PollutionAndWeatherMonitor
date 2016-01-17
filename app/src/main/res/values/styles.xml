@@ -8,6 +8,7 @@
         <item name="colorPrimary">@color/colorPrimaryApp</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDarkApp</item>
         <item name="colorAccent">@color/colorAccentApp</item>
+        <item name="android:background">@color/windowBackgroundApp</item>
 
     </style>
     <!-- Base application theme. -->
@@ -25,6 +26,7 @@
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" >
+    </style>
 
 </resources>

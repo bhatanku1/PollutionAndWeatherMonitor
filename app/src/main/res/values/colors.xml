@@ -5,12 +5,12 @@
     <color name="colorAccent">#FF4081</color>
 
     <!-- Customized color tags for the material design. The colors are defined in the file all_colors.xml-->
-    <color name="colorPrimaryApp">@color/md_pink_A400</color>
-    <color name="colorPrimaryDarkApp">@color/md_pink_A700</color>
+    <color name="colorPrimaryApp">@color/md_pink_400</color>
+    <color name="colorPrimaryDarkApp">@color/md_pink_700</color>
     <color name="textColorPrimaryApp">@color/md_white_1000</color>
-    <color name="windowBackgroundApp">@color/md_white_1000</color>
+    <color name="windowBackgroundApp">@color/md_green_300</color>
     <color name="navigationBarColorApp">@color/md_black_1000</color>
-    <color name="colorAccentApp">@color/md_pink_A100</color>
+    <color name="colorAccentApp">@color/md_pink_A400</color>
 
 
 </resources>
