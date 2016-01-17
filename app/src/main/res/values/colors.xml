@@ -3,6 +3,14 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
-    <color name="flickrColorBackgroundAccent">@color/md_pink_500</color>
+
+    <!-- Customized color tags for the material design. The colors are defined in the file all_colors.xml-->
+    <color name="colorPrimaryApp">@color/md_pink_A400</color>
+    <color name="colorPrimaryDarkApp">@color/md_pink_A700</color>
+    <color name="textColorPrimaryApp">@color/md_white_1000</color>
+    <color name="windowBackgroundApp">@color/md_white_1000</color>
+    <color name="navigationBarColorApp">@color/md_black_1000</color>
+    <color name="colorAccentApp">@color/md_pink_A100</color>
+
 
 </resources>
