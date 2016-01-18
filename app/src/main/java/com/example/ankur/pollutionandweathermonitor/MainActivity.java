@@ -17,14 +17,17 @@ import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 
 public class MainActivity extends AppCompatActivity {
+    //LoginButton and callbackManager are for facebook login
     private LoginButton loginButton;
     CallbackManager callbackManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //Initialize the facebook SDK for login
         FacebookSdk.sdkInitialize(getApplicationContext());
         callbackManager = CallbackManager.Factory.create();
         setContentView(R.layout.activity_main);
+        //create the facebook login Button
         loginButton = (LoginButton) findViewById(R.id.login_button);
         if (loginButton == null) {
             Log.v("CheckLogin", "null");
@@ -42,7 +45,8 @@ public class MainActivity extends AppCompatActivity {
                 // App code
                 Toast.makeText(getApplicationContext(), "Fb Login Success", Toast.LENGTH_LONG);
                 Log.v("CheckLogin", "successfully connected to facebook");
-                //sendMessage();
+                //On Successful login, call the function RedirectToDisplayInformation
+                RedirectToDisplayInformation();
             }
 
             @Override
@@ -66,6 +70,15 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+    //After the successful login, redirect to the DisplayInformation Activity
+    //Currently there is nothing send in the intent
+    //TODO: Get the username or first name of the user from the facebook Login and send that to the Activity
+    protected void RedirectToDisplayInformation(){
+        Log.v("sendMessage", "successfully called");
+        Intent intent = new Intent(this, DisplayInformation.class);
+        startActivity(intent);
+    }
+    //This function is to call the callback functions of facebook after the login attempt
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
