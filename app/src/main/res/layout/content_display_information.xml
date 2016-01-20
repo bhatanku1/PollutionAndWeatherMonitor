@@ -25,4 +25,33 @@
         android:id="@+id/firstname"
         android:paddingTop="50dp" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TEMPERATURE"
+        android:id="@+id/textView"
+        android:textStyle="bold"
+        android:paddingTop="20dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="HUMITIDY"
+        android:textStyle="bold"
+        android:id="@+id/textView2" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2.5M POLLUTANT"
+        android:textStyle="bold"
+        android:id="@+id/textView3" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SULPHUR DIOXIDE"
+        android:textStyle="bold"
+        android:id="@+id/textView4" />
+
 </LinearLayout>
