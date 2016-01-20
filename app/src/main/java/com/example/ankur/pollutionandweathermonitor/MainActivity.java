@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private String firstname;
     private Profile profile;
     AccessToken accessToken;
+    public final static String EXTRA_MESSAGE = "USERNAME";
     private String LOGTAG = MainActivity.class.getSimpleName();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
     protected void RedirectToDisplayInformation(){
         Log.v(LOGTAG, "successfully called the function RedirectToDisplayInformation");
         Intent intent = new Intent(this, DisplayInformation.class);
+        intent.putExtra(EXTRA_MESSAGE,firstname );
         startActivity(intent);
     }
     //This function is to call the callback functions of facebook after the login attempt
