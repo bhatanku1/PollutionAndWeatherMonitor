@@ -31,8 +31,8 @@ public class DisplayInformation extends AppCompatActivity {
         textView = (TextView) findViewById(R.id.firstname);
         Intent intent = getIntent();
         firstName = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
-        textView.setTextSize(40);
-        textView.setText("Welcome " + firstName);
+        textView.setTextSize(20);
+        textView.setText("Welcome " + firstName + "!" + " Your current location is 20 15.");
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
