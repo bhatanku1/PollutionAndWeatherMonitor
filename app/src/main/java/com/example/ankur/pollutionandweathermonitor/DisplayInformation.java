@@ -28,9 +28,12 @@ public class DisplayInformation extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
         textView = (TextView) findViewById(R.id.firstname);
+        //Get the firstname of the user logged in through facebook
         Intent intent = getIntent();
-        firstName = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
+        firstName = intent.getStringExtra(MainActivity.EXTRA_MESSAGE_FIRSTNAME);
+        //Welcome message
         textView.setTextSize(20);
         textView.setText("Welcome " + firstName + "!" + " Your current location is 20 15.");
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
