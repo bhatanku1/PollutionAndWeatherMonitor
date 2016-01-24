@@ -136,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
     protected void RedirectToDisplayInformation(){
         Log.v(LOGTAG, "successfully called the function RedirectToDisplayInformation");
         Intent intent = new Intent(this, DisplayInformation.class);
+        intent.putExtra(EXTRA_MESSAGE_LOCATION_PERMISSION, String.valueOf(permissionStatus));
         intent.putExtra(EXTRA_MESSAGE_FIRSTNAME,firstName );
         startActivity(intent);
     }
