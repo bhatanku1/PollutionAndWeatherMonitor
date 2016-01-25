@@ -19,6 +19,7 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.Profile;
+import com.facebook.ProfileTracker;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 
@@ -26,19 +27,23 @@ public class MainActivity extends AppCompatActivity {
     //LoginButton and callbackManager are for facebook login
     private LoginButton loginButton;
     CallbackManager callbackManager;
-    /*firstName is to store the firstname of the logged in facebook user*/
-    private String firstName;
-    /*profile and accessToken are for to get the current session tokens of the logged in users*/
-    private Profile profile;
+    /*isLogin is to store if the user is currently logged in to facebook*/
+    private boolean isLogin;
+    /*accessToken are for to get the current session tokens of the logged in users*/
     private AccessToken accessToken;
     /*permissionStatus is to store the ACCESS_FINE_LOCATION permission of the user*/
     private boolean permissionStatus;
-    /*EXTRA_MESSAGE_FIRSTNAME is to send the firstname of the logged in facebook user in the intent*/
-    public final static String EXTRA_MESSAGE_FIRSTNAME = "USERNAME";
     /*EXTRA_MESSAGE_LOCATION_PERMISSION is to send the ACCESS_FINE_LOCATION permission value in the intent*/
     public final static String EXTRA_MESSAGE_LOCATION_PERMISSION = "PERMISSION";
+
+    public final static String EXTRA_MESSAGE_FIRSTNAME= "FIRSTNAME";
+
     /*Logs generated in this class are accessed through the Tag LOGTAG*/
     private String LOGTAG = MainActivity.class.getSimpleName();
+    private Profile profile;
+    private ProfileTracker mProfileTracker;
+    private String firstName;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,12 +52,12 @@ public class MainActivity extends AppCompatActivity {
         callbackManager = CallbackManager.Factory.create();
         setContentView(R.layout.activity_main);
         //Call the CheckFacebookToken() function to see if there is a logged in user already.
-        //The function returns the firstname if there is a logged in user, else returns null
-        firstName = CheckFacebookToken();
-        if(firstName != null) {
+        //The function returns the true if there is a logged in user, else returns false
+        isLogin = CheckFacebookToken();
+        if(isLogin == true) {
             //If there is an active current Session, then check if the user has granted the
             // ACCESS_FINE_LOCATION permission. This check is only for Android >= 6.0
-            //For Android <6, the permission can be put in the AndroidMenifestFile
+            //For Android <6, the permission can be put in the AndroidManifest.xml
             CheckLocationPermission();
         }
         //create the facebook login Button
@@ -64,16 +69,39 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(LoginResult loginResult) {
                     Log.v(LOGTAG, "successfully connected to facebook");
-                    //After the login is successful, get the firstname of the logged in user
-                    firstName = CheckFacebookToken();
+                    profile = Profile.getCurrentProfile();
+
+                    if (profile == null) {
+                        Log.d(LOGTAG, "Profile is null");
+                        mProfileTracker = new ProfileTracker() {
+                            @Override
+                            protected void onCurrentProfileChanged(Profile oldProfile, Profile currentProfile) {
+                                mProfileTracker.stopTracking();
+                                Log.v(LOGTAG, "New profile is: " + currentProfile.getFirstName());
+                                firstName = currentProfile.getFirstName();
+                                if (firstName != null) {
+                                    CheckLocationPermission();
+
+                                }
+                            }
+                        };
+                        mProfileTracker.startTracking();
+
+                    } else {
+                        Log.d(LOGTAG, "profile is not null");
+                        Log.v(LOGTAG, "User is " + profile.getFirstName());
+                        firstName = profile.getFirstName();
+                        CheckLocationPermission();
+
+                    }
                     //If there is an active current Session, then check if the user has granted the
                     // ACCESS_FINE_LOCATION permission. This check is only for Android >= 6.0
                     //For Android <6, the permission can be put in the AndroidMenifestFile
-                    CheckLocationPermission();
                 }
 
                 @Override
                 public void onCancel() {
+                    someCallback();
                     Log.v(LOGTAG, " connection to facebook cancelled");
                 }
 
@@ -93,55 +121,41 @@ public class MainActivity extends AppCompatActivity {
     //check if the user has granted the ACCESS_FINE_LOCATION permission.
     // This check is only for Android >= 6.0. For Android <6, the permission can be put in the AndroidMenifestFile
     protected void CheckLocationPermission(){
+        Log.v(LOGTAG, "No permission currently: Asking the user");
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 100);
         }
         else{
+            Log.v(LOGTAG, "Location Permission already");
+            permissionStatus = true;
             //Redirects the user to the Activity DisplayInformation
             RedirectToDisplayInformation();
         }
-
+    }
+    protected void someCallback(){
+        Log.v(LOGTAG, "logged out from facebook");
     }
     //The function CheckFacebookToken returns the firstname of the logged in facebook user, else returns null
-    protected String CheckFacebookToken(){
+    protected boolean CheckFacebookToken(){
         //Check if there is an active facebook session
-        String fName = null;
         try{
             accessToken = AccessToken.getCurrentAccessToken();
             Log.v(LOGTAG, accessToken.getToken());
-
         } catch (Exception e){
             e.printStackTrace();
         }
-        //If there is an Active facebook session, get the firstname and redirect user to the
-        //DisplayInformation Activity, send the username through the intent
-        if(accessToken != null) {
-            try {
-                profile = Profile.getCurrentProfile();
-                if(profile != null) {
-                    fName = profile.getFirstName();
-                    Log.v(LOGTAG, "There is an active session. The logged in user is  " + fName);
-                }
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-        }
-        else {
-            Log.v(LOGTAG, "No Active sessions found");
-        }
-        return fName;
+        return accessToken != null;
     }
     //The function RedirectToDisplayInformation redirects the user to the Activity DisplayInformation
-    //The intent also sends the firstname of the logged in facebook user
-    protected void RedirectToDisplayInformation(){
+    //The intent also sends the ACCESS_FINE_LOCATION permission of the user
+    protected void RedirectToDisplayInformation() {
         Log.v(LOGTAG, "successfully called the function RedirectToDisplayInformation");
         Intent intent = new Intent(this, DisplayInformation.class);
         intent.putExtra(EXTRA_MESSAGE_LOCATION_PERMISSION, String.valueOf(permissionStatus));
-        intent.putExtra(EXTRA_MESSAGE_FIRSTNAME,firstName );
+        intent.putExtra(EXTRA_MESSAGE_FIRSTNAME, firstName);
         startActivity(intent);
     }
-
-        //This function is to call the callback functions of facebook after the login attempt
+    //This function is to call the callback functions of facebook after the login attempt
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -153,28 +167,23 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
     //The function onRequestPermissionResult is a callback to promt the user to either allow or deny the
     //permissions. This function is significant only for Android >6
     @Override
     public void onRequestPermissionsResult(int requestCode,String permissions[], int[] grantResults) {
-
         Log.v(LOGTAG, "onRequestPermissionResult");
-
         switch (requestCode) {
             case 100: {
                 // If request is cancelled, the result arrays are empty.
@@ -186,7 +195,6 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     permissionStatus = false;
                     Log.v(LOGTAG, "Permission Denied. Status is: " + String.valueOf(permissionStatus));
-
                 }
                 RedirectToDisplayInformation();
                 return;
