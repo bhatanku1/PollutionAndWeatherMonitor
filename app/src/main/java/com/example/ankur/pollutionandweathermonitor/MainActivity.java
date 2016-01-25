@@ -58,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
         //The function returns the true if there is a logged in user, else returns false
         isLogin = CheckFacebookToken();
         if(isLogin == true) {
+            profile = Profile.getCurrentProfile();
+            firstName = profile.getFirstName();
             //If there is an active current Session, then check if the user has granted the
             // ACCESS_FINE_LOCATION permission. This check is only for Android >= 6.0
             //For Android <6, the permission can be put in the AndroidManifest.xml
@@ -124,9 +126,10 @@ public class MainActivity extends AppCompatActivity {
     //check if the user has granted the ACCESS_FINE_LOCATION permission.
     // This check is only for Android >= 6.0. For Android <6, the permission can be put in the AndroidMenifestFile
     protected void CheckLocationPermission(){
-        Log.v(LOGTAG, "No permission currently: Asking the user");
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 100);
+
         }
         else{
             Log.v(LOGTAG, "Location Permission already");
@@ -186,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
     //permissions. This function is significant only for Android >6
     @Override
     public void onRequestPermissionsResult(int requestCode,String permissions[], int[] grantResults) {
-        Log.v(LOGTAG, "onRequestPermissionResult");
+        Log.v(LOGTAG, "No permission currently: Asking the user");
         switch (requestCode) {
             case 100: {
                 // If request is cancelled, the result arrays are empty.

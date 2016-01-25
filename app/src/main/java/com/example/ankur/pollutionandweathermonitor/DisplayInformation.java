@@ -1,6 +1,7 @@
 package com.example.ankur.pollutionandweathermonitor;
 
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -18,18 +19,30 @@ import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 
-public class DisplayInformation extends AppCompatActivity {
+
+public class DisplayInformation extends AppCompatActivity   implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     /*loginButton is to facilitate facebook logout */
     private LoginButton loginButton;
     /*callbackManager is for the callback functions for facebook logout*/
     private CallbackManager callbackManager;
     private TextView textView;
+    private TextView locationView;
     private String firstName;
     /* locationPermissionStatus is to store the permission status of the ACCESS_FINE_LOCATION */
     private String locationPermissionStatus;
     private String LOGTAG = DisplayInformation.class.getSimpleName();
     private AccessTokenTracker accessTokenTracker;
+    private GoogleApiClient googleApiClient;
+    private LocationRequest locationRequest;
+    private Location mLastLocation;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +50,15 @@ public class DisplayInformation extends AppCompatActivity {
         FacebookSdk.sdkInitialize(getApplicationContext());
         callbackManager = CallbackManager.Factory.create();
         setContentView(R.layout.activity_display_information);
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        locationRequest = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(10*1000)
+                .setFastestInterval(1*1000);
         loginButton = (LoginButton) findViewById(R.id.login_button);
         try{
             loginButton.setReadPermissions("user_friends");
@@ -73,7 +95,7 @@ public class DisplayInformation extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         textView = (TextView) findViewById(R.id.textView5) ;
-
+        locationView = (TextView) findViewById(R.id.location);
         //Get the firstname of the user  logged in through facebook
         //GetFacebookFirstName();
         Intent intent = getIntent();
@@ -82,7 +104,7 @@ public class DisplayInformation extends AppCompatActivity {
         firstName = intent.getStringExtra(MainActivity.EXTRA_MESSAGE_FIRSTNAME);
         //Welcome message
         //textView.setTextSize(20);
-        textView.setText("Welcome " + firstName + "!" + " Your current location is 20 15 and the permission for Location is " + locationPermissionStatus);
+        textView.setText("Welcome " + firstName + "!");
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -99,11 +121,57 @@ public class DisplayInformation extends AppCompatActivity {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }
+    @Override
+    protected void onStart(){
+        super.onStart();
+        googleApiClient.connect();
 
+        //locationView.setText("This is a placeholder for the user's last known location");
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
+    @Override
+    public void onConnected(Bundle bundle) {
+        if(locationPermissionStatus.equals("false")){
+            locationView.setText("You have disabled location Services, cant access your location");
+            return;
+        }
+        Log.v(LOGTAG, "Inside onConnectedz: " + String.valueOf(googleApiClient.isConnected()));
+        try {
+            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                    googleApiClient);
+
+            if (mLastLocation != null) {
+                Log.v(LOGTAG, String.valueOf(mLastLocation.getLatitude()));
+                Log.v(LOGTAG, String.valueOf(mLastLocation.getLongitude()));
+                locationView.setText("Your Current location is: "+ mLastLocation.toString());
+            }
+            else {
+                   //"adb emu geo fix 30.219470 -97.745361" use this command to put a temporary location in the emulator
+                    Log.v(LOGTAG, "No last known location, location service will be called");
+                    LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+                }
+
+        }catch (SecurityException e){
+            e.printStackTrace();
+            Log.v(LOGTAG, "Error in onConnected: " + e.toString());
+        }
+    }
+    @Override
+    public void onConnectionSuspended(int i) {
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        Log.v(LOGTAG, "onLocationChanged called");
+        locationView.setText("Your Current location is: "+ mLastLocation.toString());
+    }
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
+    }
 }
