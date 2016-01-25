@@ -1,7 +1,6 @@
 package com.example.ankur.pollutionandweathermonitor;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -11,12 +10,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.facebook.AccessToken;
+import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
-import com.facebook.Profile;
-import com.facebook.ProfileTracker;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 
@@ -30,9 +29,8 @@ public class DisplayInformation extends AppCompatActivity {
     /* locationPermissionStatus is to store the permission status of the ACCESS_FINE_LOCATION */
     private String locationPermissionStatus;
     private String LOGTAG = DisplayInformation.class.getSimpleName();
-    /*profile object contains facebook details like the firstname of the logged in facebook user */
-    private Profile profile;
-    private ProfileTracker mProfileTracker;
+    private AccessTokenTracker accessTokenTracker;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,17 +59,24 @@ public class DisplayInformation extends AppCompatActivity {
             Log.v(LOGTAG, "Error in the loginButton facebook");
             e.printStackTrace();
         }
+        accessTokenTracker = new AccessTokenTracker() {
+            @Override
+            protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken,
+                                                       AccessToken currentAccessToken) {
+                if (currentAccessToken == null) {
+                    //write your code here what to do when user logout
+                    Log.v(LOGTAG, "Logged out: Redirecting to facebook");
+                    RedirectToMainActivity();
+                }
+            }
+        };
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         textView = (TextView) findViewById(R.id.textView5) ;
 
-
-
         //Get the firstname of the user  logged in through facebook
         //GetFacebookFirstName();
         Intent intent = getIntent();
-        //FacebookLogin facebookLogin = new FacebookLogin();
-        //facebookLogin.execute();
         //Get the permission status of the ACCESS_FINE_LOCATION
         locationPermissionStatus = intent.getStringExtra(MainActivity.EXTRA_MESSAGE_LOCATION_PERMISSION);
         firstName = intent.getStringExtra(MainActivity.EXTRA_MESSAGE_FIRSTNAME);
@@ -88,10 +93,11 @@ public class DisplayInformation extends AppCompatActivity {
             }
         });
     }
-    @Override
-    protected void onStart(){
-        super.onStart();
-        Log.v(LOGTAG, "onStart called");
+
+    private void RedirectToMainActivity() {
+        Log.v(LOGTAG, "RedirectToMainActivity called");
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
     }
 
     @Override
@@ -99,46 +105,5 @@ public class DisplayInformation extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }
-    private class FacebookLogin extends AsyncTask<String, Void, String> {
-        @Override
-        protected String doInBackground(String... params) {
-            try {
 
-
-                profile = Profile.getCurrentProfile();
-
-                if (profile != null) {
-                    firstName = profile.getFirstName();
-                    Log.v(LOGTAG, "There is an active session. The logged in user is  " + firstName);
-                    Log.v(LOGTAG, "Profile is " + profile.toString());
-                }
-                else{
-                    Log.v(LOGTAG, "Profile is null");
-                     mProfileTracker = new ProfileTracker() {
-                        @Override
-                        protected void onCurrentProfileChanged(Profile oldProfile, Profile currentProfile) {
-                            mProfileTracker.stopTracking();
-                            Log.v(LOGTAG, "New profile is: " + currentProfile.getFirstName());
-                            firstName = currentProfile.getFirstName();
-                        }
-                    };
-                    mProfileTracker.startTracking();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return firstName;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-            Log.v(LOGTAG, "Firstname is: " + result);
-
-
-
-
-
-        }
-    }
 }

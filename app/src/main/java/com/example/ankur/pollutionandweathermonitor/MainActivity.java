@@ -35,13 +35,16 @@ public class MainActivity extends AppCompatActivity {
     private boolean permissionStatus;
     /*EXTRA_MESSAGE_LOCATION_PERMISSION is to send the ACCESS_FINE_LOCATION permission value in the intent*/
     public final static String EXTRA_MESSAGE_LOCATION_PERMISSION = "PERMISSION";
-
+    /*EXTRA_MESSAGE_FIRSTNAME is to store the firstname of the logged in facebook user for the intent*/
     public final static String EXTRA_MESSAGE_FIRSTNAME= "FIRSTNAME";
 
     /*Logs generated in this class are accessed through the Tag LOGTAG*/
     private String LOGTAG = MainActivity.class.getSimpleName();
+    /*profile and profileTracker are used to get the profile information of the facebook user*/
     private Profile profile;
     private ProfileTracker mProfileTracker;
+    /*firstname is used to store the firstname of the facebook user. This information is extracted from the
+    profile object*/
     private String firstName;
 
     @Override
