@@ -28,9 +28,15 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 
-public class DisplayInformation extends AppCompatActivity   implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class DisplayInformation extends AppCompatActivity   implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, OnMapReadyCallback {
     /*loginButton is to facilitate facebook logout */
     private LoginButton loginButton;
     /*callbackManager is for the callback functions for facebook logout*/
@@ -45,6 +51,10 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
     private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
     private Location mLastLocation;
+    private double latitude;
+    private double longitude;
+    private GoogleMap mMap;
+
 
 
 
@@ -61,8 +71,9 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
                 .build();
         locationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(10*1000)
-                .setFastestInterval(1*1000);
+                .setInterval(10 * 1000)
+                .setFastestInterval(1 * 1000);
+
         loginButton = (LoginButton) findViewById(R.id.login_button);
         try{
             loginButton.setReadPermissions("user_friends");
@@ -168,7 +179,11 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
             if (mLastLocation != null) {
                 Log.v(LOGTAG, String.valueOf(mLastLocation.getLatitude()));
                 Log.v(LOGTAG, String.valueOf(mLastLocation.getLongitude()));
-                locationView.setText("Your Current location is: "+ mLastLocation.toString());
+                locationView.setText("Your Current location is: " + mLastLocation.toString());
+                latitude = Double.parseDouble(String.valueOf(mLastLocation.getLatitude()));
+                longitude = Double.parseDouble(String.valueOf(mLastLocation.getLongitude()));
+                loadMap();
+
             }
             else {
                    //"adb emu geo fix 30.219470 -97.745361" use this command to put a temporary location in the emulator
@@ -189,9 +204,33 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
     public void onLocationChanged(Location location) {
         Log.v(LOGTAG, "onLocationChanged called");
         locationView.setText("Your Current location is: "+ mLastLocation.toString());
+        latitude = Double.parseDouble(String.valueOf(mLastLocation.getLatitude()));
+        longitude = Double.parseDouble(String.valueOf(mLastLocation.getLongitude()));
+        loadMap();
     }
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        Log.v(LOGTAG, "called onMapReady." );
+        mMap = googleMap;
+        Log.v(LOGTAG, "Longitude is: " + String.valueOf(longitude) );
+        Log.v(LOGTAG, "Latitude  is: " + String.valueOf(latitude) );
+        // Add a marker in the current location and move the camera
+        LatLng current = new LatLng(latitude, longitude);
+        mMap.addMarker(new MarkerOptions().position(current).title("Marker in the Current Location"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(current));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(12), 500, null);
+
+    }
+    public void loadMap(){
+        Log.v(LOGTAG, "called loadMap." );
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
     }
 }
