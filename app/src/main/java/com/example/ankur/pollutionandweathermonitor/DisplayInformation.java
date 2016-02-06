@@ -75,6 +75,7 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
                 .setFastestInterval(1 * 1000);
 
         loginButton = (LoginButton) findViewById(R.id.login_button);
+        loginButton.setTextSize(15);
         try{
             loginButton.setReadPermissions("user_friends");
 
@@ -136,7 +137,10 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
             @Override
             public void onPlaceSelected(Place place) {
                 // TODO: Get info about the selected place.
-                Log.v(LOGTAG, "Places: " + place.getName() + " " + place.getId());
+                Log.v(LOGTAG, "Places: " + place.getName() + " " + place.getId() + " " + place.getLatLng().latitude);
+                longitude = place.getLatLng().longitude;
+                latitude = place.getLatLng().latitude;
+                loadMap();
             }
 
             @Override

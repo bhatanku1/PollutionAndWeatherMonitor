@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">PollutionAndWeatherMonitor</string>
     <string name="action_settings">Settings</string>
-    <string name="introduction_text">Welome to the Weather and Pollution Monitoring app exclusively for the Audi Customers!</string>
+    <string name="introduction_text">Welome to the Weather and Pollution Monitoring App powered by AUDI!</string>
     <string name="title_activity_display_information">DisplayInformation</string>
 
 </resources>
