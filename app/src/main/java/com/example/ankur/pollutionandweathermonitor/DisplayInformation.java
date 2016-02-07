@@ -1,5 +1,6 @@
 package com.example.ankur.pollutionandweathermonitor;
 
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
@@ -35,6 +36,18 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.eclipse.paho.android.service.MqttAndroidClient;
+import org.eclipse.paho.client.mqttv3.IMqttActionListener;
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+
+import java.io.UnsupportedEncodingException;
+
+import static org.eclipse.paho.client.mqttv3.MqttClient.generateClientId;
+
 
 public class DisplayInformation extends AppCompatActivity   implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, OnMapReadyCallback {
     /*loginButton is to facilitate facebook logout */
@@ -54,9 +67,9 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
     private double latitude;
     private double longitude;
     private GoogleMap mMap;
-
-
-
+    MqttAndroidClient client;
+    private Context context;
+    private boolean mqttStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,9 +121,11 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
                 }
             }
         };
+        context = getApplicationContext();
+        connect();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        textView = (TextView) findViewById(R.id.textView5) ;
+        textView = (TextView) findViewById(R.id.textView) ;
         locationView = (TextView) findViewById(R.id.location);
         //Get the firstname of the user  logged in through facebook
         //GetFacebookFirstName();
@@ -120,7 +135,7 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
         firstName = intent.getStringExtra(MainActivity.EXTRA_MESSAGE_FIRSTNAME);
         //Welcome message
         //textView.setTextSize(20);
-        textView.setText("Welcome " + firstName + "!");
+        //textView.setText("Welcome " + firstName + "!");
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -140,7 +155,13 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
                 Log.v(LOGTAG, "Places: " + place.getName() + " " + place.getId() + " " + place.getLatLng().latitude);
                 longitude = place.getLatLng().longitude;
                 latitude = place.getLatLng().latitude;
+                String message = "LATITUTE: " + String.valueOf(latitude) + " LONGITUDE: " + String.valueOf(longitude);
+                locationView.setText(message);
+                //After the location is selected by the user, the maps is loaded,and the request to get
+                //the parameters for that particular location is sent to the server
                 loadMap();
+                publish();
+                subscribe();
             }
 
             @Override
@@ -150,15 +171,17 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
             }
         });
     }
-
+    //The following function is used to send the user back to the mainActivity after logout.
     private void RedirectToMainActivity() {
         Log.v(LOGTAG, "RedirectToMainActivity called");
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }
+
     @Override
     protected void onStart(){
         super.onStart();
+        //This is to start the Google Play Services
         googleApiClient.connect();
 
         //locationView.setText("This is a placeholder for the user's last known location");
@@ -168,7 +191,7 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
         super.onActivityResult(requestCode, resultCode, data);
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }
-
+    //The following function is a callback when the Google Play Services is successfully connected
     @Override
     public void onConnected(Bundle bundle) {
         if(locationPermissionStatus.equals("false")){
@@ -183,13 +206,17 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
             if (mLastLocation != null) {
                 Log.v(LOGTAG, String.valueOf(mLastLocation.getLatitude()));
                 Log.v(LOGTAG, String.valueOf(mLastLocation.getLongitude()));
-                locationView.setText("Your Current location is: " + mLastLocation.toString());
+                String message = "LATITUTE: " + String.valueOf(mLastLocation.getLatitude()) + " LONGITUDE: " + String.valueOf(mLastLocation.getLongitude());
+                locationView.setText(message);
+                //locationView.setText("Your Current location is: " + mLastLocation.toString());
                 latitude = Double.parseDouble(String.valueOf(mLastLocation.getLatitude()));
                 longitude = Double.parseDouble(String.valueOf(mLastLocation.getLongitude()));
+                //After getting the location of the user, the location is loaded in the Maps
                 loadMap();
 
+
             }
-            else {
+            else { //Incase there is no known last location, the request is made to get the location
                    //"adb emu geo fix 30.219470 -97.745361" use this command to put a temporary location in the emulator
                     Log.v(LOGTAG, "No last known location, location service will be called");
                     LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
@@ -211,12 +238,15 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
         latitude = Double.parseDouble(String.valueOf(mLastLocation.getLatitude()));
         longitude = Double.parseDouble(String.valueOf(mLastLocation.getLongitude()));
         loadMap();
+        loadMap();
+        //publish();
+
     }
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
     }
-
+    //The following loads the google maps
     @Override
     public void onMapReady(GoogleMap googleMap) {
         Log.v(LOGTAG, "called onMapReady." );
@@ -230,11 +260,108 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
         mMap.animateCamera(CameraUpdateFactory.zoomTo(12), 500, null);
 
     }
+    //Call this function, when the map has to be loaded with the new location the user searches
     public void loadMap(){
-        Log.v(LOGTAG, "called loadMap." );
+        Log.v(LOGTAG, "called loadMap.");
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+    }
+
+    //The following is to connect the user to the Backend server
+    //Currently, MQTT is used instead of the HTTP, It will be changed in the future
+    public void connect()  {
+        Log.d(LOGTAG, "called mqttConnect");
+        String clientId = generateClientId();
+        client = new MqttAndroidClient(context, "tcp://iot.eclipse.org:1883", clientId);
+
+        try {
+            IMqttToken token = client.connect();
+            token.setActionCallback(new IMqttActionListener() {
+                @Override
+                public void onSuccess(IMqttToken asyncActionToken) {
+                    // We are connected
+                    Log.d(LOGTAG, "MQTT onSuccess");
+                    mqttStatus = true;
+                    subscribe();
+                    publish();
+                }
+
+                @Override
+                public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+                    // Something went wrong e.g. connection timeout or firewall problems
+                    Log.d(LOGTAG, "MQTT onFailure");
+                    mqttStatus =false;
+
+
+
+                }
+            });
+        } catch (MqttException e) {
+            e.printStackTrace();
+
+        }
+        return;
+    }
+    //Subscribe is used to subscribe for the parameters from the Server. As soon as the parameters are received, the values are
+    //updated in the respective views
+    public void subscribe() {
+        Log.d("MQTT", "called subscribe");
+
+        String topic = "tum/racube/audi/res";
+        int qos = 1;
+        try {
+            client.setCallback(new MqttCallback() {
+                @Override
+                public void connectionLost(Throwable cause) {
+
+                }
+
+                @Override
+                public void messageArrived(String topic, MqttMessage message) throws Exception {
+                    Log.d(LOGTAG, "message was received");
+                    textView.setText("TEMPERATUE: " + message.toString());
+                }
+
+                @Override
+                public void deliveryComplete(IMqttDeliveryToken token) {
+
+                }
+            });
+            IMqttToken subToken = client.subscribe(topic, qos);
+            subToken.setActionCallback(new IMqttActionListener() {
+                @Override
+                public void onSuccess(IMqttToken asyncActionToken) {
+                    Log.d(LOGTAG, "Sub is successful");
+                    // The message was published
+                }
+
+                @Override
+                public void onFailure(IMqttToken asyncActionToken,
+                                      Throwable exception) {
+                    // The subscription could not be performed, maybe the user was not
+                    // authorized to subscribe on the specified topic e.g. using wildcards
+
+                }
+
+            });
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+    //Publish is used to send the request to the server for the desired location
+    public void publish() {
+        Log.d(LOGTAG, "MQTT Publish");
+        String topic = "tum/racube/audi/req";
+        String payload = String.valueOf(latitude) + " " + String.valueOf(longitude);
+        byte[] encodedPayload = new byte[0];
+        try {
+            encodedPayload = payload.getBytes("UTF-8");
+            MqttMessage message = new MqttMessage(encodedPayload);
+            client.publish(topic, message);
+        } catch (UnsupportedEncodingException | MqttException e) {
+            e.printStackTrace();
+        }
     }
 }

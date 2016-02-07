@@ -4,6 +4,8 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/PollutionAndWeatherMonitor.iml" filepath="$PROJECT_DIR$/PollutionAndWeatherMonitor.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/auditablet-release/auditablet-release.iml" filepath="$PROJECT_DIR$/auditablet-release/auditablet-release.iml" />
+      <module fileurl="file://$PROJECT_DIR$/contentProviderLib-release/contentProviderLib-release.iml" filepath="$PROJECT_DIR$/contentProviderLib-release/contentProviderLib-release.iml" />
     </modules>
   </component>
 </project>
