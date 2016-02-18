@@ -55,6 +55,7 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
     /*callbackManager is for the callback functions for facebook logout*/
     private CallbackManager callbackManager;
     private TextView textView;
+    private TextView textviewPollutants;
     private TextView locationView;
     private String firstName;
     /* locationPermissionStatus is to store the permission status of the ACCESS_FINE_LOCATION */
@@ -126,6 +127,7 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         textView = (TextView) findViewById(R.id.textView) ;
+        textviewPollutants = (TextView) findViewById(R.id.textView3);
         locationView = (TextView) findViewById(R.id.location);
         //Get the firstname of the user  logged in through facebook
         //GetFacebookFirstName();
@@ -307,7 +309,7 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
     //Subscribe is used to subscribe for the parameters from the Server. As soon as the parameters are received, the values are
     //updated in the respective views
     public void subscribe() {
-        Log.d("MQTT", "called subscribe");
+        Log.d("MQTT", "called Subscribe");
 
         String topic = "tum/racube/audi/res";
         int qos = 1;
@@ -321,7 +323,12 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
                 @Override
                 public void messageArrived(String topic, MqttMessage message) throws Exception {
                     Log.d(LOGTAG, "message was received");
+                    //These are just dummy values received from the Server. The business logic to get the
+                    //actual values will be added later. This is just for the prototype.
+                    Double pollutant;
+                    pollutant = Double.parseDouble(message.toString())/4;
                     textView.setText("TEMPERATUE: " + message.toString());
+                    textviewPollutants.setText("POLLUTANTS: " + String.valueOf(pollutant));
                 }
 
                 @Override

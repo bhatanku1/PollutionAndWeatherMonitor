@@ -11,6 +11,9 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
@@ -32,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     /*accessToken are for to get the current session tokens of the logged in users*/
     private AccessToken accessToken;
     /*permissionStatus is to store the ACCESS_FINE_LOCATION permission of the user*/
-    private boolean permissionStatus;
+    private boolean permissionStatus = true;
     /*EXTRA_MESSAGE_LOCATION_PERMISSION is to send the ACCESS_FINE_LOCATION permission value in the intent*/
     public final static String EXTRA_MESSAGE_LOCATION_PERMISSION = "PERMISSION";
     /*EXTRA_MESSAGE_FIRSTNAME is to store the firstname of the logged in facebook user for the intent*/
@@ -45,7 +48,11 @@ public class MainActivity extends AppCompatActivity {
     private ProfileTracker mProfileTracker;
     /*firstname is used to store the firstname of the facebook user. This information is extracted from the
     profile object*/
-    private String firstName;
+    private String firstName ="Audi";
+    /*Login button for users who dont have facebook account*/
+    private Button loginBtn;
+    private EditText username;
+    private EditText password;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +72,24 @@ public class MainActivity extends AppCompatActivity {
             //For Android <6, the permission can be put in the AndroidManifest.xml
             CheckLocationPermission();
         }
+        //Login button for users who dont have facebook
+        loginBtn = (Button) findViewById(R.id.btn_login);
+        username = (EditText) findViewById(R.id.input_email);
+        password =  (EditText) findViewById(R.id.input_password);
+        loginBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(username.getText().toString().equals("audi") && password.getText().toString().equals("audi")){
+                    RedirectToDisplayInformation();
+                }
+                else {
+                    Log.d(LOGTAG, username.getText().toString());
+                    Toast toastMessage = Toast.makeText(getApplicationContext(), "Wrong Credentials", Toast.LENGTH_LONG);
+                    toastMessage.show();
+                }
+
+            }
+        });
         //create the facebook login Button
         loginButton = (LoginButton) findViewById(R.id.login_button);
         try{
