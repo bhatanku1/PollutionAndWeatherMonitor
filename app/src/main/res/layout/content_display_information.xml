@@ -46,35 +46,45 @@
 
             <LinearLayout
                 android:id="@+id/LinearLayout6"
-                android:layout_width="wrap_content"
+                android:layout_width="200dp"
                 android:layout_height="match_parent"
                 android:background="#757575"
                 android:orientation="vertical">
                 <ImageView
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:src="@drawable/home"/>
+                    android:layout_width="125dp"
+                    android:layout_height="125dp"
+                    android:src="@drawable/audi_home_h"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginLeft="25dp" />
 
                 />
                 <ImageView
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:tint="#55ff0000"
-                    android:src="@drawable/home"/>
+                    android:layout_width="125dp"
+                    android:layout_height="125dp"
+                    android:layout_marginLeft="25dp"
+                    android:layout_marginRight="5dp"
+
+                    android:src="@drawable/audi_weather_d"/>
 
                 />
                 <ImageView
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:tint="#55ff0000"
-                    android:src="@drawable/home"/>
+                    android:layout_width="125dp"
+                    android:layout_height="125dp"
+                    android:layout_marginLeft="25dp"
+                    android:layout_marginRight="5dp"
+
+                    android:src="@drawable/audi_pollution_d"/>
 
                 />
                 <ImageView
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:tint="#55ff0000"
-                    android:src="@drawable/home"/>
+                    android:layout_width="125dp"
+                    android:layout_height="125dp"
+                    android:layout_marginLeft="25dp"
+                    android:layout_marginRight="5dp"
+
+                    android:src="@drawable/audi_maps_d"/>
+
+
 
                 />
             </LinearLayout>
@@ -83,7 +93,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="#FFFF88"
+            android:background="#757575"
+
             android:orientation="vertical">
             <TextView
                 android:layout_width="wrap_content"
