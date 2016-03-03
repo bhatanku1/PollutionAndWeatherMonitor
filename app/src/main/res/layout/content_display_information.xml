@@ -58,31 +58,31 @@
                     android:layout_marginLeft="25dp" />
 
                 />
-                <ImageView
+                <ImageButton
                     android:layout_width="125dp"
                     android:layout_height="125dp"
                     android:layout_marginLeft="25dp"
                     android:layout_marginRight="5dp"
 
-                    android:src="@drawable/audi_weather_d"/>
+                    android:background="@drawable/weather"/>
 
                 />
-                <ImageView
+                <ImageButton
                     android:layout_width="125dp"
                     android:layout_height="125dp"
                     android:layout_marginLeft="25dp"
                     android:layout_marginRight="5dp"
 
-                    android:src="@drawable/audi_pollution_d"/>
+                    android:background="@drawable/pollution"/>
 
                 />
-                <ImageView
+                <ImageButton
                     android:layout_width="125dp"
                     android:layout_height="125dp"
                     android:layout_marginLeft="25dp"
                     android:layout_marginRight="5dp"
 
-                    android:src="@drawable/audi_maps_d"/>
+                    android:background="@drawable/maps"/>
 
 
 
