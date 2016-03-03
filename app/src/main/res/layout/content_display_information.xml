@@ -63,7 +63,7 @@
                     android:layout_height="125dp"
                     android:layout_marginLeft="25dp"
                     android:layout_marginRight="5dp"
-
+                    android:onClick="RedirectToWeather"
                     android:background="@drawable/weather"/>
 
                 />
@@ -72,6 +72,7 @@
                     android:layout_height="125dp"
                     android:layout_marginLeft="25dp"
                     android:layout_marginRight="5dp"
+                    android:onClick="RedirectToPollution"
 
                     android:background="@drawable/pollution"/>
 
@@ -81,6 +82,7 @@
                     android:layout_height="125dp"
                     android:layout_marginLeft="25dp"
                     android:layout_marginRight="5dp"
+                    android:onClick="RedirectToHeatMap"
 
                     android:background="@drawable/maps"/>
 

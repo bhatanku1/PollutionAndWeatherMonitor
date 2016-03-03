@@ -59,7 +59,7 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
     private TextView locationView;
     private String firstName;
     /* locationPermissionStatus is to store the permission status of the ACCESS_FINE_LOCATION */
-    private String locationPermissionStatus;
+    private String locationPermissionStatus = "";
     private String LOGTAG = DisplayInformation.class.getSimpleName();
     private AccessTokenTracker accessTokenTracker;
     private GoogleApiClient googleApiClient;
@@ -70,6 +70,8 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
     private GoogleMap mMap;
     MqttAndroidClient client;
     private Context context;
+    private String intentWeatherCondition;
+
     private boolean mqttStatus;
 
     @Override
@@ -139,6 +141,13 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
         //textView.setTextSize(20);
         //textView.setText("Welcome " + firstName + "!");
 
+        longitude = intent.getExtras().getDouble(Weather.EXTRA_MESSAGE_LONGITUTE);
+        latitude = intent.getExtras().getDouble(Weather.EXTRA_MESSAGE_LATITUTE);
+        intentWeatherCondition = intent.getStringExtra(Weather.EXTRA_MESSAGE_CONDITION);
+       if(intentWeatherCondition !=null){
+            Log.d(LOGTAG, "Returned from the Weather Activity");
+            loadMap();
+        }
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -172,12 +181,25 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
                 Log.v(LOGTAG, "An error occurred: " + status);
             }
         });
+
     }
     //The following function is used to send the user back to the mainActivity after logout.
     private void RedirectToMainActivity() {
         Log.v(LOGTAG, "RedirectToMainActivity called");
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+    }
+    public void RedirectToWeather(View view){
+        Intent intentWeather = new Intent(this, Weather.class);
+        startActivity(intentWeather);
+    }
+    public void RedirectToPollution(View view){
+        Intent intentWeather = new Intent(this, Pollution.class);
+        startActivity(intentWeather);
+    }
+    public void RedirectToHeatMap(View view){
+        Intent intentWeather = new Intent(this, HeatMap.class);
+        startActivity(intentWeather);
     }
 
     @Override
@@ -196,37 +218,40 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
     //The following function is a callback when the Google Play Services is successfully connected
     @Override
     public void onConnected(Bundle bundle) {
-        if(locationPermissionStatus.equals("false")){
+        if(intentWeatherCondition == null) {
+
+
+        /*if(locationPermissionStatus.equals("false")){
             locationView.setText("You have disabled location Services, cant access your location");
             return;
-        }
-        Log.v(LOGTAG, "Inside onConnectedz: " + String.valueOf(googleApiClient.isConnected()));
-        try {
-            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                    googleApiClient);
+        }*/
+            Log.v(LOGTAG, "Inside onConnectedz: " + String.valueOf(googleApiClient.isConnected()));
+            try {
+                mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                        googleApiClient);
 
-            if (mLastLocation != null) {
-                Log.v(LOGTAG, String.valueOf(mLastLocation.getLatitude()));
-                Log.v(LOGTAG, String.valueOf(mLastLocation.getLongitude()));
-                String message = "LATITUTE: " + String.valueOf(mLastLocation.getLatitude()) + " LONGITUDE: " + String.valueOf(mLastLocation.getLongitude());
-                locationView.setText(message);
-                //locationView.setText("Your Current location is: " + mLastLocation.toString());
-                latitude = Double.parseDouble(String.valueOf(mLastLocation.getLatitude()));
-                longitude = Double.parseDouble(String.valueOf(mLastLocation.getLongitude()));
-                //After getting the location of the user, the location is loaded in the Maps
-                loadMap();
+                if (mLastLocation != null) {
+                    Log.v(LOGTAG, String.valueOf(mLastLocation.getLatitude()));
+                    Log.v(LOGTAG, String.valueOf(mLastLocation.getLongitude()));
+                    String message = "LATITUTE: " + String.valueOf(mLastLocation.getLatitude()) + " LONGITUDE: " + String.valueOf(mLastLocation.getLongitude());
+                    locationView.setText(message);
+                    //locationView.setText("Your Current location is: " + mLastLocation.toString());
+                    latitude = Double.parseDouble(String.valueOf(mLastLocation.getLatitude()));
+                    longitude = Double.parseDouble(String.valueOf(mLastLocation.getLongitude()));
+                    //After getting the location of the user, the location is loaded in the Maps
+                    loadMap();
 
 
-            }
-            else { //Incase there is no known last location, the request is made to get the location
-                   //"adb emu geo fix 30.219470 -97.745361" use this command to put a temporary location in the emulator
+                } else { //Incase there is no known last location, the request is made to get the location
+                    //"adb emu geo fix 30.219470 -97.745361" use this command to put a temporary location in the emulator
                     Log.v(LOGTAG, "No last known location, location service will be called");
                     LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
                 }
 
-        }catch (SecurityException e){
-            e.printStackTrace();
-            Log.v(LOGTAG, "Error in onConnected: " + e.toString());
+            } catch (SecurityException e) {
+                e.printStackTrace();
+                Log.v(LOGTAG, "Error in onConnected: " + e.toString());
+            }
         }
     }
     @Override
@@ -371,4 +396,6 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
             e.printStackTrace();
         }
     }
+
+
 }

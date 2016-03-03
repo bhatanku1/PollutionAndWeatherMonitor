@@ -22,7 +22,7 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_api" />
 
-        <service android:name="org.eclipse.paho.android.service.MqttService"></service>
+        <service android:name="org.eclipse.paho.android.service.MqttService" />
 
         <activity
             android:name=".MainActivity"
@@ -49,7 +49,30 @@
             android:name=".DisplayInformation"
             android:label="@string/title_activity_display_information"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".WeatherActivity"></activity>
+        <activity
+            android:name=".Pollution"
+            android:label="@string/title_activity_pollution"
+            android:parentActivityName=".DisplayInformation"
+            android:theme="@style/MyMaterialTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.ankur.pollutionandweathermonitor.DisplayInformation" />
+        </activity>
+        <activity
+            android:name=".HeatMap"
+            android:label="@string/title_activity_heat_map"
+            android:parentActivityName=".DisplayInformation"
+            android:theme="@style/MyMaterialTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.ankur.pollutionandweathermonitor.DisplayInformation" />
+        </activity>
+        <activity
+            android:name=".Weather"
+            android:label="@string/title_activity_weather"
+            android:theme="@style/AppTheme.NoActionBar">
+
+        </activity>
     </application>
 
 </manifest>
