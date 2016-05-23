@@ -65,13 +65,18 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
     private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
     private Location mLastLocation;
-    private double latitude;
-    private double longitude;
+    private static double latitude;
+    private static double longitude;
     private GoogleMap mMap;
     MqttAndroidClient client;
     private Context context;
     private String intentWeatherCondition;
-
+    public static final String EXTRA_MESSAGE_LONGITUTE ="longitude";
+    public static final String EXTRA_MESSAGE_LATITUTE ="latitude";
+    public static final String EXTRA_MESSAGE_PAYLOAD ="temperature";
+    private static String payload;
+    private double temperature;
+    private static boolean  onConnected = false;
     private boolean mqttStatus;
 
     @Override
@@ -128,8 +133,8 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
         connect();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        textView = (TextView) findViewById(R.id.textView) ;
-        textviewPollutants = (TextView) findViewById(R.id.textView3);
+        //textView = (TextView) findViewById(R.id.textView) ;
+        //textviewPollutants = (TextView) findViewById(R.id.textView3);
         locationView = (TextView) findViewById(R.id.location);
         //Get the firstname of the user  logged in through facebook
         //GetFacebookFirstName();
@@ -141,8 +146,8 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
         //textView.setTextSize(20);
         //textView.setText("Welcome " + firstName + "!");
 
-        longitude = intent.getExtras().getDouble(Weather.EXTRA_MESSAGE_LONGITUTE);
-        latitude = intent.getExtras().getDouble(Weather.EXTRA_MESSAGE_LATITUTE);
+        //longitude = intent.getExtras().getDouble(Weather.EXTRA_MESSAGE_LONGITUTE);
+        //latitude = intent.getExtras().getDouble(Weather.EXTRA_MESSAGE_LATITUTE);
         intentWeatherCondition = intent.getStringExtra(Weather.EXTRA_MESSAGE_CONDITION);
        if(intentWeatherCondition !=null){
             Log.d(LOGTAG, "Returned from the Weather Activity");
@@ -191,14 +196,25 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
     }
     public void RedirectToWeather(View view){
         Intent intentWeather = new Intent(this, Weather.class);
+        intentWeather.putExtra(EXTRA_MESSAGE_LATITUTE, latitude);
+        intentWeather.putExtra(EXTRA_MESSAGE_LONGITUTE, longitude);
+        intentWeather.putExtra(EXTRA_MESSAGE_PAYLOAD, payload);
+
+
         startActivity(intentWeather);
     }
     public void RedirectToPollution(View view){
-        Intent intentWeather = new Intent(this, Pollution.class);
+        Intent intentWeather = new Intent(this, Test.class);
+        intentWeather.putExtra(EXTRA_MESSAGE_LATITUTE, latitude);
+        intentWeather.putExtra(EXTRA_MESSAGE_LONGITUTE, longitude);
+        intentWeather.putExtra(EXTRA_MESSAGE_PAYLOAD, payload);
         startActivity(intentWeather);
     }
     public void RedirectToHeatMap(View view){
         Intent intentWeather = new Intent(this, HeatMap.class);
+        intentWeather.putExtra(EXTRA_MESSAGE_LATITUTE, latitude);
+        intentWeather.putExtra(EXTRA_MESSAGE_LONGITUTE, longitude);
+        intentWeather.putExtra(EXTRA_MESSAGE_PAYLOAD, payload);
         startActivity(intentWeather);
     }
 
@@ -309,10 +325,17 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
                     // We are connected
-                    Log.d(LOGTAG, "MQTT onSuccess");
+                    Log.d(LOGTAG, "MQTT onSuccess" + String.valueOf(onConnected));
                     mqttStatus = true;
                     subscribe();
-                    publish();
+                    if (onConnected == false) {
+                        publish();
+                        onConnected = true;
+                    }
+                    else{
+                        String message = "LATITUTE: " + String.valueOf(latitude) + " LONGITUDE: " + String.valueOf(longitude);
+                        locationView.setText(message);
+                    }
                 }
 
                 @Override
@@ -350,10 +373,11 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
                     Log.d(LOGTAG, "message was received");
                     //These are just dummy values received from the Server. The business logic to get the
                     //actual values will be added later. This is just for the prototype.
-                    Double pollutant;
-                    pollutant = Double.parseDouble(message.toString())/4;
-                    textView.setText("TEMPERATUE: " + message.toString());
-                    textviewPollutants.setText("POLLUTANTS: " + String.valueOf(pollutant));
+                   payload = message.toString();
+                    temperature = 10.00;
+                    // temperature = Double.parseDouble(message.toString());
+                   // textView.setText("TEMPERATUE: " + message.toString());
+                    //textviewPollutants.setText("POLLUTANTS: " + String.valueOf(pollutant));
                 }
 
                 @Override
@@ -389,6 +413,8 @@ public class DisplayInformation extends AppCompatActivity   implements GoogleApi
         String payload = String.valueOf(latitude) + " " + String.valueOf(longitude);
         byte[] encodedPayload = new byte[0];
         try {
+            Log.d(LOGTAG, "about to publish");
+
             encodedPayload = payload.getBytes("UTF-8");
             MqttMessage message = new MqttMessage(encodedPayload);
             client.publish(topic, message);

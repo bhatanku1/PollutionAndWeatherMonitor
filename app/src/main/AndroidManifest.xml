@@ -11,7 +11,7 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/logo"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/MyMaterialTheme">
@@ -53,26 +53,26 @@
             android:name=".Pollution"
             android:label="@string/title_activity_pollution"
             android:parentActivityName=".DisplayInformation"
-            android:theme="@style/MyMaterialTheme">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.ankur.pollutionandweathermonitor.DisplayInformation" />
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".HeatMap"
             android:label="@string/title_activity_heat_map"
             android:parentActivityName=".DisplayInformation"
-            android:theme="@style/MyMaterialTheme">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.ankur.pollutionandweathermonitor.DisplayInformation" />
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Weather"
             android:label="@string/title_activity_weather"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Test"
+            android:label="Pollution"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
+            android:name=".PollutionO3"
+            android:label="@string/title_activity_pollution_o3"
+            android:parentActivityName=".Test"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
 
-        </activity>
     </application>
 
 </manifest>

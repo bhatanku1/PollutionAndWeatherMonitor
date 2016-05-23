@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(username.getText().toString().equals("") && password.getText().toString().equals("")){
+                if(username.getText().toString().equals("audi") && password.getText().toString().equals("audi")){
                     RedirectToDisplayInformation();
                 }
                 else {
